@@ -1,0 +1,55 @@
+name: EnvShape
+description: Audit a private env file against a public .env.example contract.
+author: EnvShape contributors
+
+inputs:
+  env-file:
+    description: Path to the private env file to check.
+    required: false
+    default: .env
+  example-file:
+    description: Path to the public env example contract.
+    required: false
+    default: .env.example
+  allow-extra:
+    description: Allow variables in the env file that are not documented in the example file.
+    required: false
+    default: "false"
+  require-non-empty:
+    description: Fail when documented variables are present but blank in the env file.
+    required: false
+    default: "false"
+  strict:
+    description: Treat warnings as failures.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+    - shell: bash
+      env:
+        ENVSHAPE_ENV_FILE: ${{ inputs.env-file }}
+        ENVSHAPE_EXAMPLE_FILE: ${{ inputs.example-file }}
+        ENVSHAPE_ALLOW_EXTRA: ${{ inputs.allow-extra }}
+        ENVSHAPE_REQUIRE_NON_EMPTY: ${{ inputs.require-non-empty }}
+        ENVSHAPE_STRICT: ${{ inputs.strict }}
+      run: |
+        args=(check --env "$ENVSHAPE_ENV_FILE" --example "$ENVSHAPE_EXAMPLE_FILE" --format github)
+
+        if [ "$ENVSHAPE_ALLOW_EXTRA" = "true" ]; then
+          args+=(--allow-extra)
+        fi
+
+        if [ "$ENVSHAPE_REQUIRE_NON_EMPTY" = "true" ]; then
+          args+=(--require-non-empty)
+        fi
+
+        if [ "$ENVSHAPE_STRICT" = "true" ]; then
+          args+=(--strict)
+        fi
+
+        node "$GITHUB_ACTION_PATH/src/cli.js" "${args[@]}"

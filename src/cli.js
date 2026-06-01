@@ -6,10 +6,16 @@ import { generateExample } from "./generate-example.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
+const packageUrl = new URL("../package.json", import.meta.url);
 
 try {
   if (!command || command === "--help" || command === "-h") {
     printHelp();
+    process.exit(0);
+  }
+
+  if (command === "--version" || command === "-v") {
+    printVersion();
     process.exit(0);
   }
 
@@ -37,14 +43,26 @@ function runCheck(flags) {
     allowExtra: Boolean(flags["allow-extra"]),
     requireNonEmpty: Boolean(flags["require-non-empty"])
   });
+  const strict = Boolean(flags.strict);
+  const blocking = !result.ok || (strict && result.stats.warnings > 0);
+  const outputResult = { ...result, ok: !blocking, strict };
+  const format = flags.format ?? "text";
 
   if (flags.json) {
-    console.log(JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(outputResult, null, 2));
+  } else if (format === "github") {
+    printGithubAnnotations(outputResult);
+  } else if (format === "text") {
+    printAudit(outputResult);
   } else {
-    printAudit(result);
+    fail(`Unsupported --format value "${format}". Use "text" or "github".`);
   }
 
-  process.exit(result.ok ? 0 : 1);
+  if (strict && result.stats.warnings > 0 && !flags.json) {
+    console.error("ERROR: strict mode treats warnings as failures.");
+  }
+
+  process.exit(blocking ? 1 : 0);
 }
 
 function runGenerate(flags) {
@@ -158,6 +176,34 @@ function printAudit(result) {
   console.log(`Found ${result.stats.errors} errors and ${result.stats.warnings} warnings.`);
 }
 
+function printGithubAnnotations(result) {
+  if (result.problems.length === 0) {
+    console.log(`EnvShape OK: ${result.stats.actualKeys} keys match the example contract.`);
+    return;
+  }
+
+  for (const problem of result.problems) {
+    const level = problem.severity === "warning" ? "warning" : "error";
+    const properties = [];
+
+    if (problem.source) {
+      properties.push(`file=${escapeAnnotationProperty(problem.source)}`);
+    }
+
+    if (problem.line) {
+      properties.push(`line=${problem.line}`);
+    }
+
+    if (problem.code) {
+      properties.push(`title=${escapeAnnotationProperty(problem.code)}`);
+    }
+
+    console.log(`::${level} ${properties.join(",")}::${escapeAnnotationData(problem.message)}`);
+  }
+
+  console.log(`EnvShape checked ${result.stats.actualKeys} local keys against ${result.stats.exampleKeys} example keys.`);
+}
+
 function formatProblem(problem) {
   const location = problem.source && problem.line ? `${problem.source}:${problem.line}` : problem.source;
   const code = problem.code ? ` ${problem.code}` : "";
@@ -170,13 +216,32 @@ function fail(message) {
   process.exit(1);
 }
 
+function printVersion() {
+  const packageJson = JSON.parse(readFileSync(packageUrl, "utf8"));
+  console.log(packageJson.version);
+}
+
+function escapeAnnotationData(value) {
+  return String(value)
+    .replace(/%/g, "%25")
+    .replace(/\r/g, "%0D")
+    .replace(/\n/g, "%0A");
+}
+
+function escapeAnnotationProperty(value) {
+  return escapeAnnotationData(value)
+    .replace(/:/g, "%3A")
+    .replace(/,/g, "%2C");
+}
+
 function printHelp() {
   console.log(`EnvShape CLI
 
 Usage:
-  envshape check --env .env --example .env.example [--allow-extra] [--require-non-empty] [--json]
+  envshape check --env .env --example .env.example [--allow-extra] [--require-non-empty] [--strict] [--json] [--format github]
   envshape generate --env .env --out .env.example [--force] [--keep-defaults]
   envshape list --env .env
+  envshape --version
 
 Commands:
   check      Compare a private env file with a public example contract.

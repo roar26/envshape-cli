@@ -8,6 +8,7 @@
   },
   "scripts": {
     "check": "node src/cli.js check --env examples/.env.local --example examples/.env.example --require-non-empty",
+    "ci": "npm test && npm run check",
     "generate": "node src/cli.js generate --env examples/.env.local --out examples/.env.generated.example --force",
     "test": "node --test"
   },
@@ -21,7 +22,29 @@
   ],
   "author": "EnvShape contributors",
   "license": "MIT",
+  "homepage": "https://github.com/roar26/envshape-cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roar26/envshape-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/roar26/envshape-cli/issues"
+  },
+  "files": [
+    "action.yml",
+    "src",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "ROADMAP.md",
+    "SECURITY.md"
+  ],
   "engines": {
     "node": ">=20"
-  }
+  },
+  "packageManager": "npm@11.12.1"
 }

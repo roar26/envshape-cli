@@ -53,7 +53,7 @@ export function auditEnvFiles(actualContent, exampleContent, options = {}) {
         severity: "error",
         code: "env.missing_key",
         key,
-        source: actualSource,
+        source: exampleSource,
         line: exampleEntry.line,
         message: `${key} is documented in ${exampleSource} but missing from ${actualSource}.`
       });

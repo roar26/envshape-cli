@@ -11,6 +11,7 @@ code review.
 - key present in `.env` but missing from `.env.example`, unless `--allow-extra`
   is used
 - blank required value when `--require-non-empty` is used
+- warning found while `--strict` is used
 
 ## Warnings
 

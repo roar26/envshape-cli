@@ -1,5 +1,7 @@
 # EnvShape CLI
 
+[![CI](https://github.com/roar26/envshape-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/roar26/envshape-cli/actions/workflows/ci.yml)
+
 EnvShape is a small zero-dependency command line tool for keeping environment
 variable files honest. It compares a private `.env` file with a public
 `.env.example` contract, reports drift, and can generate a safe example file
@@ -62,6 +64,18 @@ Return machine-readable output:
 envshape check --env .env --example .env.example --json
 ```
 
+Use GitHub Actions annotations:
+
+```bash
+envshape check --env .env --example .env.example --format github
+```
+
+Treat warnings as failures:
+
+```bash
+envshape check --env .env --example .env.example --strict
+```
+
 Generate a safe `.env.example` file from an existing `.env` file:
 
 ```bash
@@ -82,6 +96,31 @@ envshape list --env .env
 
 ## CI Example
 
+Use EnvShape directly as a GitHub Action:
+
+```yaml
+name: envshape
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  envshape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: roar26/envshape-cli@v0.1.0
+        with:
+          env-file: examples/.env.local
+          example-file: examples/.env.example
+          require-non-empty: "true"
+          strict: "true"
+```
+
+Or run the CLI in an existing Node.js workflow:
+
 ```yaml
 name: envshape
 
@@ -99,8 +138,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npm test
-      - run: node src/cli.js check --env examples/.env.local --example examples/.env.example --require-non-empty
+      - run: npm run ci
 ```
 
 ## Exit Codes
@@ -109,13 +147,14 @@ jobs:
 - `1`: EnvShape found an error or could not complete the requested command
 
 Warnings are printed for potentially risky example values, but they do not fail
-the command unless they accompany an error.
+the command unless they accompany an error or `--strict` is used.
 
 ## Project Status
 
 This is an early open source project. The first goal is a dependable CLI for
 small and medium JavaScript projects. Planned improvements include typed rules,
 schema export, and adapters for framework-specific environment conventions.
+See [ROADMAP.md](ROADMAP.md) for planned work.
 
 ## Contributing
 
