@@ -1,0 +1,27 @@
+{
+  "name": "envshape-cli",
+  "version": "0.1.0",
+  "description": "A small CLI that audits .env files against a safe, public .env.example contract.",
+  "type": "module",
+  "bin": {
+    "envshape": "./src/cli.js"
+  },
+  "scripts": {
+    "check": "node src/cli.js check --env examples/.env.local --example examples/.env.example --require-non-empty",
+    "generate": "node src/cli.js generate --env examples/.env.local --out examples/.env.generated.example --force",
+    "test": "node --test"
+  },
+  "keywords": [
+    "dotenv",
+    "env",
+    "configuration",
+    "cli",
+    "security",
+    "ci"
+  ],
+  "author": "EnvShape contributors",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
