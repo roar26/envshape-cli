@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: roar26/envshape-cli@v0.1.0
+      - uses: roar26/envshape-cli@v0.1.1
         with:
           env-file: .env.local
           example-file: .env.example

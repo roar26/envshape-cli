@@ -25,7 +25,25 @@ a pull request.
 
 ## Install
 
-For local development:
+Run without installing:
+
+```bash
+npx envshape-cli@latest check --env .env --example .env.example
+```
+
+Install in a project:
+
+```bash
+npm install --save-dev envshape-cli
+```
+
+Then run:
+
+```bash
+npx envshape check --env .env --example .env.example
+```
+
+For local development from this repository:
 
 ```bash
 npm install
@@ -111,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: roar26/envshape-cli@v0.1.0
+      - uses: roar26/envshape-cli@v0.1.1
         with:
           env-file: examples/.env.local
           example-file: examples/.env.example

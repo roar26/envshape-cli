@@ -1,10 +1,11 @@
 {
   "name": "envshape-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A small CLI that audits .env files against a safe, public .env.example contract.",
   "type": "module",
   "bin": {
-    "envshape": "src/cli.js"
+    "envshape": "src/cli.js",
+    "envshape-cli": "src/cli.js"
   },
   "scripts": {
     "check": "node src/cli.js check --env examples/.env.local --example examples/.env.example --require-non-empty",
